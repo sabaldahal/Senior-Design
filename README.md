@@ -14,7 +14,7 @@
 - **Email** neupansa@mail.uc.edu
 ---
 - **Name:** Aayush Pokhrel
-- **Major:** Aayush Pokhrel
+- **Major:** Computer Science
 - **Email** pokhreah@mail.uc.edu
 ---
 
