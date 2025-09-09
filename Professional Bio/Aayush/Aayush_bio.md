@@ -1,6 +1,6 @@
-# ** Professional Biography**
+# **Professional Biography**
 
-## ** Contact Information**
+## **Contact Information**
 
 Name: Aayush Pokhrel
 
@@ -62,4 +62,5 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 * Some kind of project that has to do with python SQL and power BI related to data analytics and visualization.
 
 * Mobile App development so that I can have experience in bringing any ideas that I have into the mobile atmosphere.
+
 
