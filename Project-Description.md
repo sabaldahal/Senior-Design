@@ -13,7 +13,7 @@
 - **Major:** Computer Science
 - **Email** neupansa@mail.uc.edu
 ---
-- **Name:** Saugat Neupane
+- **Name:** Aayush Pokhrel
 - **Major:** Aayush Pokhrel
 - **Email** pokhreah@mail.uc.edu
 ---
