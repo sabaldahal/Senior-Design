@@ -1,6 +1,6 @@
-#** Professional Biography**
+# ** Professional Biography**
 
-##** Contact Information**
+## ** Contact Information**
 
 Name: Aayush Pokhrel
 
@@ -11,9 +11,9 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 
 
 * Research Intern, University of Dayton Research Institute, Dayton, Ohio (2 Semesters):
-* Developed advanced machine learning algorithms and control systems software using tools like MATLAB/Simulink, Python, and Visual C++ to enhance the performance of autonomous systems.
-* Performed detailed analysis, modeling, simulation, and testing of autonomous vehicles and dynamic systems, ensuring optimal functionality and efficiency in real-world applications.
-* Contributed to cutting-edge research in quantum algorithms and quantum computing, applying innovative solutions to machine learning and control system challenges.
+    * Developed advanced machine learning algorithms and control systems software using tools like MATLAB/Simulink, Python, and Visual C++ to enhance the performance of autonomous systems.
+    * Performed detailed analysis, modeling, simulation, and testing of autonomous vehicles and dynamic systems, ensuring optimal functionality and efficiency in real-world applications.
+    * Contributed to cutting-edge research in quantum algorithms and quantum computing, applying innovative solutions to machine learning and control system challenges.
 * Project Management Co-op, EMCOR Facilities Services, Cincinnati, Ohio (1 Semester):
     * Led meetings and worked with the project management team to assist with writing and processing all project assignments from the proposal to the closing documents.
     * Kept track, updated, and created documents for 120+ projects and communicated effectively with PMs to resolve any problems that may have come up.
@@ -60,4 +60,5 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 
 * A machine learning predictive model that can predict the basic stats for a player or players that can happen in one particular night, so that it can give me the best parlay.
 * Some kind of project that has to do with python SQL and power BI related to data analytics and visualization.
+
 * Mobile App development so that I can have experience in bringing any ideas that I have into the mobile atmosphere.
