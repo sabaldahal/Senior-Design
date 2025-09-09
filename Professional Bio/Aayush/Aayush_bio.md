@@ -8,8 +8,6 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 
 ## **Co-op Work Experience**
 
-
-
 * Research Intern, University of Dayton Research Institute, Dayton, Ohio (2 Semesters):
     * Developed advanced machine learning algorithms and control systems software using tools like MATLAB/Simulink, Python, and Visual C++ to enhance the performance of autonomous systems.
     * Performed detailed analysis, modeling, simulation, and testing of autonomous vehicles and dynamic systems, ensuring optimal functionality and efficiency in real-world applications.
@@ -21,8 +19,6 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 
 ## **Skills**	
 
-
-
 * Programming: Python, C++, Java, Swift
 * Operating System: macOS, Windows, Linux
 * Web Development: HTML, Javascript, CSS
@@ -30,8 +26,6 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 * Office Applications:  LabVIEW, MATLAB, Adobe CC, Microsoft Office, Wireshark, Power BI, Smartsheet, PostgreSQL, Tableau
 
 ## **Projects**
-
-
 
 * Stock Price Prediction Model (Python)
     * Utilized a Long Short-Term Memory (LSTM) neural network to forecast the closing prices of Apple Inc. stock, leveraging historical data spanning over a decade.
@@ -44,8 +38,6 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 
 ## **Areas of Interest**
 
-
-
 * Database Applications
 * Machine Learning
 * Artificial Intelligence
@@ -54,13 +46,9 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 
 ## **Types of Project Sought**
 
- 
-
-
-
 * A machine learning predictive model that can predict the basic stats for a player or players that can happen in one particular night, so that it can give me the best parlay.
 * Some kind of project that has to do with python SQL and power BI related to data analytics and visualization.
-
 * Mobile App development so that I can have experience in bringing any ideas that I have into the mobile atmosphere.
+
 
 
