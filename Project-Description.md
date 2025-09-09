@@ -19,5 +19,8 @@
 ---
 
 ## Project Topic Area
-- TBD
+- Deep Learning
+- Image recognition system
+- Automation
+- Inventory Management
 
