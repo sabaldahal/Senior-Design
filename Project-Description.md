@@ -2,7 +2,7 @@
 
 
 
-## Team name : TBD
+## Team name : SSA
 
 ## Team Members
 - **Name:** Sabal Dahal
@@ -19,8 +19,5 @@
 ---
 
 ## Project Topic Area
-- Deep Learning
-- Image recognition system
-- Automation
-- Inventory Management
+- A deep learning–based image recognition system for automated, real-time inventory management
 
