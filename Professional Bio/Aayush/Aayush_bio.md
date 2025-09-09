@@ -42,7 +42,7 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
     * Integrated live data through API calls, processing player performance metrics (points, rebounds, assists) and storing them in a structured PostgreSQL database.
     * Designed interactive Tableau dashboards for comprehensive insights, including player comparisons, league trends, and predictive analytics. 
 
-##**Areas of Interest**
+## **Areas of Interest**
 
 
 
@@ -52,7 +52,7 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 * Cloud Computing
 * Medical Field
 
-##**Types of Project Sought**
+## **Types of Project Sought**
 
  
 
@@ -62,3 +62,4 @@ Email: [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)
 * Some kind of project that has to do with python SQL and power BI related to data analytics and visualization.
 
 * Mobile App development so that I can have experience in bringing any ideas that I have into the mobile atmosphere.
+
