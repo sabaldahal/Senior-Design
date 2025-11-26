@@ -115,14 +115,14 @@ The effort matrix document provides percentage or hour allocation per member:
 
 ## ABET Concerns Essay
 
-- `Homework/Project-Constraint-Essay.md` 
+[Project Constraint Essay](Homework/Project%20Constraint%20Essay.pdf)
 
 This essay discusses economic, professional, ethical, and security constraints, the use of open-source tools, and data privacy considerations.
 
 ---
 
 ## PPT Slideshow
-- `Homework/Fall-Design-Presentation.pdf`
+[PPT Slideshow](Homework/PPT%20Slideshow.pptx)
 
 This slideshow summarizes team members, goals, user stories, design diagrams, constraints, milestones, and the expected demo.
 
@@ -130,9 +130,9 @@ This slideshow summarizes team members, goals, user stories, design diagrams, co
 
 ## Self-Assessment Essays
 
-- `Homework/Individual-Capstone-Assessment-Sabal.md`  
-- `Homework/Individual-Capstone-Assessment-Saugat.md`  
-- `Homework/Individual-Capstone-Assessment-Aayush.md`
+[Self Assessment - Sabal](Homework/Self%20Assessment/self-assessment_sabal.pdf)
+[Self Assessment - Sabal](Homework/Self%20Assessment/self-assessment_saugat.pdf)
+[Self Assessment - Sabal](Homework/Self%20Assessment/self-assessment_aayush.pdf)
 
 Each essay reflects on academic preparation, technical competencies, co-op experiences, motivation, and measurable goals for contribution.
 
