@@ -53,9 +53,14 @@ Efficient inventory management is crucial for warehouses, retail stores, and lab
 5. As a laboratory technician, I want accurate inventory tracking to minimize waste and ensure compliance.
 
 ### Design Diagrams
-- Level 0: Overall architecture showing input (images), processing (AI/ML), database, and dashboard/output.
-- Level 1: Data flow between input module, ML image processing, backend, dashboard.
-- Level 2: Component breakdown—camera/upload, deep learning subsystem, database tables, backend API, frontend dashboard.
+![Design Diagram 0](Design_Diagrams/design_diagram_0.png)
+Fig: Level 0: Overall architecture showing input (images), processing (AI/ML), database, and dashboard/output.
+
+![Design Diagram 1](Design_Diagrams/design_diagram_1.png)
+Fig: Level 1: Data flow between input module, ML image processing, backend, dashboard.
+
+![Design Diagram 2](Design_Diagrams/design_diagram_2.png)
+Fig: Level 2: Component breakdown—camera/upload, deep learning subsystem, database tables, backend API, frontend dashboard.
 
 ### Description of the Diagrams
 Design diagrams follow modular conventions, with components labeled for input, processing, storage, and visualization. Each diagram is structured to clarify how images are captured, processed using deep learning, routed to the database backend, and finally visualized and alerted on the dashboard.
@@ -100,9 +105,12 @@ Individual reflection on academic preparation, technical competencies, co-op exp
 
 ## Professional Biographies
 Includes biographies for:
-- Saugat Neupane
+- Saugat Neupane 
+[Biography](Professional%20Bio/Saugat/biography-saugat.md)
 - Sabal Dahal
+[Biography](Professional%20Bio/Sabal/biography-sabal.md)
 - Aayush Pokhrel
+[Biography](Professional%20Bio/Aayush/Aayush_bio.md)
 
 ## Budget
 - No expenses to date; all work conducted with university resources and open source tools.
