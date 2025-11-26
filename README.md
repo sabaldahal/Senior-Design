@@ -60,12 +60,15 @@
 Design diagrams are stored in the `Design_Diagrams` folder:
 
 ![Design Diagram 0](Design_Diagrams/design_diagram_0.png)
+
 Fig: Level 0: Overall architecture showing input (images), processing (AI/ML), database, and dashboard/output.
 
 ![Design Diagram 1](Design_Diagrams/design_diagram_1.png)
+
 Fig: Level 1: Data flow between input module, ML image processing, backend, dashboard.
 
 ![Design Diagram 2](Design_Diagrams/design_diagram_2.png)
+
 Fig: Level 2: Component breakdown—camera/upload, deep learning subsystem, database tables, backend API, frontend dashboard.
 
 ### Description of the Diagrams
