@@ -162,7 +162,7 @@ The appendix aggregates supporting documentation and evidence of effort:
 - Team contract:  
   - [Homework/Senior Design Team Contract Draft.docx](Homework/Senior%20Design%20Team%20Contract%20Draft.docx)
 - Links to code repositories:  
-  - `https://github.com/<sabaldahal>/Senior-Design`
+  - `https://github.com/sabaldahal/Senior-Design`
 - Timeline and effort matrix files.
 - Any additional references, research notes, or design documents.
 ---
