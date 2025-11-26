@@ -9,7 +9,9 @@
   - [Description of the Diagrams](#description-of-the-diagrams)
 - [Project Tasks and Timeline](#project-tasks-and-timeline)
   - [Task List](#task-list)
-  - [Timeline And Effort Matrix](#effort-matrix)
+  - [Timeline And Effort Matrix](#timeline-and-effort-matrix)
+    - [Timeline](#timeline)
+    - [Effort Matrix](#effort-matrix)
 - [ABET Concerns Essay](#abet-concerns-essay)
 - [PPT Slideshow](#ppt-slideshow)
 - [Self-Assessment Essays](#self-assessment-essays)
@@ -107,7 +109,7 @@ This file enumerates project-specific activities, responsible team members, and 
 
 ### Timeline and Effort Matrix
 
-[Timeline and Effort Matrix](Homework/Milestone,%20Timeline%20and%20Effort%20Matrix.pdf)
+[View Timeline and Effort Matrix](Homework/Milestone,%20Timeline%20and%20Effort%20Matrix.pdf)
 
 #### Timeline
 
