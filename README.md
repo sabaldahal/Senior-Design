@@ -57,15 +57,16 @@
 5. As a laboratory technician, I want accurate inventory tracking to minimize waste and ensure compliance.
 
 ### Design Diagrams
-
 Design diagrams are stored in the `Design_Diagrams` folder:
 
-- Level 0 (context / overall architecture):  
-  - [Design_Diagrams/design_diagram_0.png](Design_Diagrams/design_diagram_0.png)
-- Level 1 (subsystem data flow):  
-  - [Design_Diagrams/design_diagram_1.png](Design_Diagrams/design_diagram_1.png)
-- Level 2 (detailed components):  
-  - [Design_Diagrams/design_diagram_2.png](Design_Diagrams/design_diagram_2.png)
+![Design Diagram 0](Design_Diagrams/design_diagram_0.png)
+Fig: Level 0: Overall architecture showing input (images), processing (AI/ML), database, and dashboard/output.
+
+![Design Diagram 1](Design_Diagrams/design_diagram_1.png)
+Fig: Level 1: Data flow between input module, ML image processing, backend, dashboard.
+
+![Design Diagram 2](Design_Diagrams/design_diagram_2.png)
+Fig: Level 2: Component breakdown—camera/upload, deep learning subsystem, database tables, backend API, frontend dashboard.
 
 ### Description of the Diagrams
 
@@ -135,16 +136,16 @@ Each essay reflects on academic preparation, technical competencies, co-op exper
 ---
 
 ## Professional Biographies
-
 Professional biographies are organized in the `Professional Bio` directory:
 
-- [Professional Bio/Sabal/biography-sabal.md](Professional%20Bio/Sabal/biography-sabal.md)  
-- [Professional Bio/Saugat/biography-saugat.md](Professional%20Bio/Saugat/biography-saugat.md)  
-- [Professional Bio/Aayush/biography-aayush.md](Professional%20Bio/Aayush/biography-aayush.md)
+- Saugat Neupane 
+[Biography](Professional%20Bio/Saugat/biography-saugat.md)
+- Sabal Dahal
+[Biography](Professional%20Bio/Sabal/biography-sabal.md)
+- Aayush Pokhrel
+[Biography](Professional%20Bio/Aayush/Aayush_bio.md)
 
 These include contact information, co-op work experience, projects, skills, and project interests.
-
----
 
 ## Budget
 
