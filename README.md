@@ -131,8 +131,11 @@ This slideshow summarizes team members, goals, user stories, design diagrams, co
 ## Self-Assessment Essays
 
 [Self Assessment - Sabal](Homework/Self%20Assessment/self-assessment_sabal.pdf)
-[Self Assessment - Sabal](Homework/Self%20Assessment/self-assessment_saugat.pdf)
-[Self Assessment - Sabal](Homework/Self%20Assessment/self-assessment_aayush.pdf)
+
+[Self Assessment - Saugat](Homework/Self%20Assessment/self-assessment_saugat.pdf)
+
+[Self Assessment - Aayush](Homework/Self%20Assessment/self-assessment_aayush.pdf)
+
 
 Each essay reflects on academic preparation, technical competencies, co-op experiences, motivation, and measurable goals for contribution.
 
