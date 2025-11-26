@@ -107,9 +107,60 @@ This file enumerates project-specific activities, responsible team members, and 
 
 ### Timeline and Effort Matrix
 
+[Timeline and Effort Matrix](Homework/Milestone,%20Timeline%20and%20Effort%20Matrix.pdf)
+
+#### Timeline
+
+
+| Task | Task Description                   | Responsible | Start Date     | End Date       | Milestone |
+|------|------------------------------------|-------------|----------------|----------------|-----------|
+| 1    | Research DL models                 | Sabal       | Oct 7, 2025    | Oct 31, 2025   | M1        |
+| 2    | Collect / preprocess images        | Sabal       | Oct 7, 2025    | Nov 15, 2025   | M2        |
+| 3    | Design ML training pipeline        | Sabal       | Oct 20, 2025   | Nov 10, 2025   | M2        |
+| 4    | Train / evaluate baseline model    | Sabal       | Nov 11, 2025   | Dec 1, 2025    | M2        |
+| 5    | Refine model architecture          | Sabal       | Dec 2, 2025    | Dec 15, 2025   | M2        |
+| 6    | Specify database schema            | Aayush      | Nov 10, 2025   | Nov 20, 2025   | M3        |
+| 7    | Develop backend API                | Aayush      | Nov 21, 2025   | Dec 15, 2025   | M3        |
+| 8    | Integrate ML with backend          | Aayush      | Jan 5, 2026    | Jan 20, 2026   | M3        |
+| 9    | Implement authentication           | Aayush      | Jan 5, 2026    | Jan 20, 2026   | M3        |
+| 10   | Test backend modules               | Aayush      | Jan 21, 2026   | Jan 31, 2026   | M3        |
+| 11   | Design dashboard UI                | Saugat      | Nov 21, 2025   | Dec 15, 2025   | M4        |
+| 12   | Develop monitoring features        | Saugat      | Jan 5, 2026    | Jan 25, 2026   | M4        |
+| 13   | Implement alerts / notifications   | Saugat      | Jan 26, 2026   | Feb 10, 2026   | M4        |
+| 14   | Validate UI/UX                     | Saugat      | Feb 11, 2026   | Feb 20, 2026   | M4        |
+| 15   | Document frontend code             | Saugat      | Feb 21, 2026   | Feb 28, 2026   | M4        |
+| 16   | Integrate subsystems               | Team        | Mar 1, 2026    | Mar 10, 2026   | M5        |
+| 17   | Conduct system-wide testing        | Team        | Mar 11, 2026   | Mar 20, 2026   | M5        |
+| 18   | Evaluate performance / refine      | Team        | Mar 11, 2026   | Mar 20, 2026   | M5        |
+| 19   | Prepare project documentation      | Team        | Mar 21, 2026   | Mar 28, 2026   | M6        |
+| 20   | Final demo                         | Team        | Apr 1, 2026    | Apr 5, 2026    | M6        |
+
+#### Effort Matrix
+
 The effort matrix document provides percentage or hour allocation per member:
 
-- `Homework/Milestone-Timeline-and-Effort-Matrix.md` 
+| Task # | Task Description                   | Sabal (%) | Aayush (%) | Saugat (%) |
+|--------|------------------------------------|-----------|------------|------------|
+| 1      | Research DL models                 | 70.0      | 15.0       | 15.0       |
+| 2      | Collect / preprocess images        | 70.0      | 15.0       | 15.0       |
+| 3      | Design ML training pipeline        | 70.0      | 15.0       | 15.0       |
+| 4      | Train / evaluate baseline model    | 70.0      | 15.0       | 15.0       |
+| 5      | Refine model architecture          | 70.0      | 15.0       | 15.0       |
+| 6      | Specify database schema            | 15.0      | 70.0       | 15.0       |
+| 7      | Develop backend API                | 15.0      | 70.0       | 15.0       |
+| 8      | Integrate ML with backend          | 15.0      | 70.0       | 15.0       |
+| 9      | Implement authentication           | 15.0      | 70.0       | 15.0       |
+| 10     | Test backend modules               | 15.0      | 70.0       | 15.0       |
+| 11     | Design dashboard UI                | 15.0      | 15.0       | 70.0       |
+| 12     | Develop monitoring features        | 15.0      | 15.0       | 70.0       |
+| 13     | Implement alerts / notifications   | 15.0      | 15.0       | 70.0       |
+| 14     | Validate UI/UX                     | 15.0      | 15.0       | 70.0       |
+| 15     | Document frontend code             | 15.0      | 15.0       | 70.0       |
+| 16     | Integrate subsystems               | 33.3      | 33.3       | 33.3       |
+| 17     | Conduct system-wide testing        | 33.3      | 33.3       | 33.3       |
+| 18     | Evaluate performance / refine      | 33.3      | 33.3       | 33.3       |
+| 19     | Prepare project documentation      | 33.3      | 33.3       | 33.3       |
+| 20     | Present final demo                 | 33.3      | 33.3       | 33.3       |
 
 ---
 
