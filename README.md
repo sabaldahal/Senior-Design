@@ -9,8 +9,7 @@
   - [Description of the Diagrams](#description-of-the-diagrams)
 - [Project Tasks and Timeline](#project-tasks-and-timeline)
   - [Task List](#task-list)
-  - [Timeline](#timeline)
-  - [Effort Matrix](#effort-matrix)
+  - [Timeline And Effort Matrix](#effort-matrix)
 - [ABET Concerns Essay](#abet-concerns-essay)
 - [PPT Slideshow](#ppt-slideshow)
 - [Self-Assessment Essays](#self-assessment-essays)
@@ -38,12 +37,12 @@
   **Email:** [pokhreah@mail.uc.edu](mailto:pokhreah@mail.uc.edu)  
 
 **Project Abstract:**  
-Our project focuses on an AI-powered inventory management system that combines deep learning for image recognition with an automated backend database for real-time stock tracking. The system allows users to add, remove, and monitor inventory via a dashboard using technologies like TensorFlow, PostgreSQL, and React. It minimizes manual entry, provides alerts for low-stock conditions, and supports operational efficiency.
+- Our project focuses on an AI-powered inventory management system that combines deep learning for image recognition with an automated backend database for real-time stock tracking. The system allows users to add, remove, and monitor inventory via a dashboard using technologies like TensorFlow, PostgreSQL, and React. It minimizes manual entry, provides alerts for low-stock conditions, and supports operational efficiency.
 ---
 
 ## Project Description
 
-Efficient inventory management is crucial for warehouses, retail stores, and laboratories. Our solution automates traditional manual tracking methods by integrating deep learning, backend database management, and visualization. The system captures images, recognizes stock items, and updates database counts seamlessly while supporting operational decision-making.
+- Efficient inventory management is crucial for warehouses, retail stores, and laboratories. Our solution automates traditional manual tracking methods by integrating deep learning, backend database management, and visualization. The system captures images, recognizes stock items, and updates database counts seamlessly while supporting operational decision-making.
 ---
 
 ## User Stories and Design Diagrams
@@ -104,7 +103,7 @@ This file enumerates project-specific activities, responsible team members, and 
 
 ### Timeline and Effort Matrix
 
-The effort matrix document provides percentage or hour allocation per member and serves as evidence toward the required 45+ hours of effort per team member:
+The effort matrix document provides percentage or hour allocation per member:
 
 - `Homework/Milestone-Timeline-and-Effort-Matrix.md` 
 
@@ -163,7 +162,7 @@ The appendix aggregates supporting documentation and evidence of effort:
 - Team contract:  
   - [Homework/Senior Design Team Contract Draft.docx](Homework/Senior%20Design%20Team%20Contract%20Draft.docx)
 - Links to code repositories:  
-  - `https://github.com/<org-or-user>/Senior-Design`
+  - `https://github.com/<sabaldahal>/Senior-Design`
 - Timeline and effort matrix files.
 - Any additional references, research notes, or design documents.
 ---
