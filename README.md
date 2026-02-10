@@ -79,7 +79,10 @@ Design diagrams follow modular conventions, with components labeled for input, p
 Each diagram is structured to clarify how images are captured, processed using deep learning, routed to the database backend, and finally visualized and alerted on the dashboard.
 
 ---
+## User Documentation
+- [User Guide and User Manual](Homework/User-Guide.md)
 
+---
 ## Project Tasks and Timeline
 
 ### Task List
