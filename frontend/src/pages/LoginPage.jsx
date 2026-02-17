@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../api/inventory';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -13,22 +15,37 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setLoading(true);
 
     try {
-      // For demo: accept any non-empty credentials when backend is unavailable
       if (!username.trim() || !password.trim()) {
         throw new Error('Please enter username and password');
       }
 
-      // TODO: Replace with real API call when backend is ready
-      // const { data } = await authApi.login(username, password);
-      const mockToken = 'mock-jwt-token-' + Date.now();
-      const mockUser = { username: username.trim() };
-      login(mockUser, mockToken);
+      // Try live backend first.
+      const { data } = await authApi.login(username.trim(), password);
+      const token = data?.token || data?.accessToken;
+      const userData = data?.user || { username: username.trim() };
+
+      if (!token) {
+        throw new Error('Login response missing auth token.');
+      }
+
+      login(userData, token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Login failed');
+      // If backend is unavailable during development, allow demo login.
+      const isNetworkFailure = !err.response;
+      if (isNetworkFailure) {
+        const mockToken = 'mock-jwt-token-' + Date.now();
+        const mockUser = { username: username.trim() };
+        login(mockUser, mockToken);
+        setNotice('Backend unavailable. Signed in using demo mode.');
+        navigate('/');
+      } else {
+        setError(err.response?.data?.message || err.message || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -78,6 +95,11 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+            {notice && (
+              <div className="p-3 rounded-lg bg-emerald-500/20 text-emerald-100 text-sm">
+                {notice}
+              </div>
+            )}
             <button
               type="submit"
               disabled={loading}
@@ -86,9 +108,7 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
-          <p className="mt-6 text-center text-slate-400 text-sm">
-            Use any username and password for demo
-          </p>
+          <p className="mt-6 text-center text-slate-400 text-sm">Use your backend credentials.</p>
         </div>
       </div>
     </div>

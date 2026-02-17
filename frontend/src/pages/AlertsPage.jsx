@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { dashboardApi } from '../api/inventory';
 import { mockAlerts } from '../data/mockData';
 
 function formatTimestamp(ts) {
@@ -22,11 +23,14 @@ export default function AlertsPage() {
       setLoading(true);
       setError(null);
       try {
-        // TODO: Replace with dashboardApi.getAlerts() when backend is ready
-        await new Promise((r) => setTimeout(r, 400));
-        setAlerts(mockAlerts);
+        const { data } = await dashboardApi.getAlerts();
+        const list = Array.isArray(data) ? data : data?.alerts;
+        if (!Array.isArray(list)) {
+          throw new Error('Unexpected alerts response format');
+        }
+        setAlerts(list);
       } catch (err) {
-        setError(err.message || 'Failed to load alerts');
+        setError(err.response?.data?.message || 'Backend unavailable. Showing demo data.');
         setAlerts(mockAlerts);
       } finally {
         setLoading(false);

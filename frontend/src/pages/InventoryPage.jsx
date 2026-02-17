@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { inventoryApi } from '../api/inventory';
 import { mockItems } from '../data/mockData';
 
 export default function InventoryPage() {
@@ -13,11 +14,19 @@ export default function InventoryPage() {
       setLoading(true);
       setError(null);
       try {
-        // TODO: Replace with inventoryApi.getItems() when backend is ready
-        await new Promise((r) => setTimeout(r, 400));
-        setItems(mockItems);
+        const { data } = await inventoryApi.getItems();
+        const list = Array.isArray(data) ? data : data?.items;
+        if (!Array.isArray(list)) {
+          throw new Error('Unexpected inventory response format');
+        }
+        setItems(
+          list.map((item) => ({
+            ...item,
+            status: item.status || (Number(item.quantity) <= 5 ? 'Low' : 'OK'),
+          }))
+        );
       } catch (err) {
-        setError(err.message || 'Failed to load inventory');
+        setError(err.response?.data?.message || 'Backend unavailable. Showing demo data.');
         setItems(mockItems);
       } finally {
         setLoading(false);

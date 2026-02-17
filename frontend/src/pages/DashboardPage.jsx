@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { dashboardApi } from '../api/inventory';
 import { mockSummary, mockChartData } from '../data/mockData';
 
 export default function DashboardPage() {
@@ -21,13 +22,19 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        // TODO: Replace with real API when backend is ready
-        // const { data } = await dashboardApi.getSummary();
-        await new Promise((r) => setTimeout(r, 500));
-        setSummary(mockSummary);
-        setChartData(mockChartData);
+        const { data } = await dashboardApi.getSummary();
+        const normalizedSummary = data?.summary || data || {};
+        const normalizedChart = data?.weeklyActivity || data?.chartData || mockChartData;
+
+        setSummary({
+          totalItems: normalizedSummary.totalItems ?? 0,
+          lowStockCount: normalizedSummary.lowStockCount ?? 0,
+          alertsCount: normalizedSummary.alertsCount ?? 0,
+          categories: normalizedSummary.categories ?? 0,
+        });
+        setChartData(Array.isArray(normalizedChart) ? normalizedChart : mockChartData);
       } catch (err) {
-        setError(err.message || 'Failed to load dashboard');
+        setError(err.response?.data?.message || 'Backend unavailable. Showing demo data.');
         setSummary(mockSummary);
         setChartData(mockChartData);
       } finally {

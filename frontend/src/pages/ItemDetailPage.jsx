@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { inventoryApi } from '../api/inventory';
 import { mockItems } from '../data/mockData';
 
 export default function ItemDetailPage() {
@@ -13,12 +14,20 @@ export default function ItemDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        // TODO: Replace with inventoryApi.getItem(id) when backend is ready
-        await new Promise((r) => setTimeout(r, 300));
+        const { data } = await inventoryApi.getItem(id);
+        const candidate = data?.item || data;
+        setItem(
+          candidate
+            ? {
+                ...candidate,
+                status: candidate.status || (Number(candidate.quantity) <= 5 ? 'Low' : 'OK'),
+              }
+            : null
+        );
+      } catch (err) {
         const found = mockItems.find((i) => i.id === id);
         setItem(found || null);
-      } catch (err) {
-        setError(err.message || 'Failed to load item');
+        setError(err.response?.data?.message || 'Backend unavailable. Showing demo data.');
       } finally {
         setLoading(false);
       }
@@ -37,6 +46,11 @@ export default function ItemDetailPage() {
   if (!item) {
     return (
       <div className="p-8">
+        {error && (
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-800">
+            {error}
+          </div>
+        )}
         <div className="bg-rose-50 border border-rose-200 rounded-lg p-6 text-rose-800">
           Item not found.
         </div>
@@ -49,6 +63,11 @@ export default function ItemDetailPage() {
 
   return (
     <div className="p-8">
+      {error && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-800">
+          {error}
+        </div>
+      )}
       <Link
         to="/inventory"
         className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6"
