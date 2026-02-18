@@ -1,18 +1,29 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { inventoryApi } from '../api/inventory';
 
 export default function AddItemPage() {
-  const [name, setName] = useState('');
+  const location = useLocation();
+  const prefill = location.state || {};
+
+  const [name, setName] = useState(prefill.name || '');
   const [quantity, setQuantity] = useState('');
-  const [category, setCategory] = useState('');
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [category, setCategory] = useState(prefill.category || '');
+  const [image, setImage] = useState(prefill.imageBlob || null);
+  const [preview, setPreview] = useState(prefill.imageUrl || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [prefilled, setPrefilled] = useState(!!prefill.name);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  // Clean up the prefilled object URL when component unmounts or image changes
+  useEffect(() => {
+    return () => {
+      if (prefill.imageUrl) URL.revokeObjectURL(prefill.imageUrl);
+    };
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -93,37 +104,66 @@ export default function AddItemPage() {
       </div>
 
       <div className="max-w-xl">
+        {prefilled && (
+          <div className="mb-6 p-4 rounded-lg bg-primary-50 border border-primary-200 text-primary-800 text-sm">
+            Fields pre-filled from camera classification. Review and adjust before submitting.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Image source: upload OR camera */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Item Image</label>
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-colors"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-              {preview ? (
-                <div className="flex flex-col items-center gap-2">
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="max-h-40 rounded-lg object-cover border border-slate-200"
+
+            {preview ? (
+              <div className="border-2 border-slate-200 rounded-xl p-6 text-center">
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="max-h-40 rounded-lg object-cover border border-slate-200 mx-auto mb-3"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImage(null);
+                    setPreview(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className="text-sm text-rose-600 hover:text-rose-700 font-medium"
+                >
+                  Remove image
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Upload file option */}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-colors"
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
                   />
-                  <span className="text-sm text-slate-500">Click to change image</span>
-                </div>
-              ) : (
-                <div>
-                  <span className="text-4xl block mb-2">📷</span>
-                  <p className="text-slate-600">Click to upload an image</p>
+                  <span className="text-3xl block mb-2">📁</span>
+                  <p className="text-slate-600 font-medium">Upload Image</p>
                   <p className="text-sm text-slate-400 mt-1">PNG, JPG up to 5MB</p>
                 </div>
-              )}
-            </div>
+
+                {/* Connect camera option */}
+                <div
+                  onClick={() => navigate('/camera')}
+                  className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors"
+                >
+                  <span className="text-3xl block mb-2">📷</span>
+                  <p className="text-slate-600 font-medium">Connect Device / Camera</p>
+                  <p className="text-sm text-slate-400 mt-1">Capture and auto-classify</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
