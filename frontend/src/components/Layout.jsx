@@ -22,7 +22,7 @@ export default function Layout() {
     <div className="min-h-screen bg-slate-50 flex">
       <aside className="w-64 bg-slate-900 text-white flex flex-col shrink-0">
         <div className="p-6 border-b border-slate-700">
-          <h1 className="text-xl font-bold tracking-tight">AI Inventory</h1>
+          <h1 className="text-xl font-bold tracking-tight">Inventory Management System</h1>
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map(({ to, label, icon }) => (
