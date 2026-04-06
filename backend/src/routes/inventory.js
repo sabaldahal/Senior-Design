@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const { getPool, sql } = require("../db");
+const { withSqlRetry, sql } = require("../db");
 const { requireApiKey } = require("../middleware/apiKey");
 
 const router = express.Router();
@@ -32,6 +32,7 @@ function mapItem(row) {
     quantity: Number(row.quantity),
     notes: row.notes || "",
     imageUrl: row.image_url || null,
+    source: row.source || "manual",
     created_at: row.created_at,
     updated_at: row.updated_at
   };
@@ -39,12 +40,13 @@ function mapItem(row) {
 
 router.get("/items", async (_req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT item_id, sku, name, category, quantity, notes, image_url, created_at, updated_at
+    const result = await withSqlRetry((pool) =>
+      pool.request().query(`
+      SELECT item_id, sku, name, category, quantity, notes, image_url, source, created_at, updated_at
       FROM dbo.Items
       ORDER BY name ASC;
-    `);
+    `)
+    );
     return res.json({ items: result.recordset.map(mapItem) });
   } catch (err) {
     return res.status(500).json({ message: "Failed to fetch items", error: err.message });
@@ -53,14 +55,16 @@ router.get("/items", async (_req, res) => {
 
 router.get("/items/:id", async (req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request()
-      .input("id", sql.UniqueIdentifier, req.params.id)
-      .query(`
-        SELECT item_id, sku, name, category, quantity, notes, image_url, created_at, updated_at
+    const result = await withSqlRetry((pool) =>
+      pool
+        .request()
+        .input("id", sql.UniqueIdentifier, req.params.id)
+        .query(`
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @id;
-      `);
+      `)
+    );
 
     if (!result.recordset.length) {
       return res.status(404).json({ message: "Item not found" });
@@ -80,6 +84,8 @@ router.post("/items", requireApiKey, async (req, res) => {
     const notes = String(req.body?.notes || "").trim();
     const skuRaw = req.body?.sku;
     const sku = skuRaw ? String(skuRaw).trim() : null;
+    const sourceRaw = req.body?.source;
+    const source = sourceRaw ? String(sourceRaw).trim() : "manual";
 
     if (!name) {
       return res.status(400).json({ message: "name is required" });
@@ -88,22 +94,25 @@ router.post("/items", requireApiKey, async (req, res) => {
       return res.status(400).json({ message: "quantity must be a non-negative number" });
     }
 
-    const pool = await getPool();
-    const result = await pool.request()
-      .input("name", sql.NVarChar(200), name)
-      .input("sku", sql.NVarChar(64), sku)
-      .input("category", sql.NVarChar(100), category || null)
-      .input("quantity", sql.Int, Math.round(quantity))
-      .input("notes", sql.NVarChar(sql.MAX), notes || null)
-      .query(`
+    const result = await withSqlRetry((pool) =>
+      pool
+        .request()
+        .input("name", sql.NVarChar(200), name)
+        .input("sku", sql.NVarChar(64), sku)
+        .input("category", sql.NVarChar(100), category || null)
+        .input("quantity", sql.Int, Math.round(quantity))
+        .input("notes", sql.NVarChar(sql.MAX), notes || null)
+        .input("source", sql.NVarChar(32), source || "manual")
+        .query(`
         DECLARE @newId uniqueidentifier = NEWID();
-        INSERT INTO dbo.Items (item_id, sku, name, category, quantity, notes, updated_at)
-        VALUES (@newId, @sku, @name, @category, @quantity, @notes, SYSUTCDATETIME());
+        INSERT INTO dbo.Items (item_id, sku, name, category, quantity, notes, source, updated_at)
+        VALUES (@newId, @sku, @name, @category, @quantity, @notes, @source, SYSUTCDATETIME());
 
-        SELECT item_id, sku, name, category, quantity, notes, image_url, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @newId;
-      `);
+      `)
+    );
 
     return res.status(201).json({ item: mapItem(result.recordset[0]) });
   } catch (err) {
@@ -119,12 +128,14 @@ router.put("/items/:id", requireApiKey, async (req, res) => {
     const hasCategory = Object.prototype.hasOwnProperty.call(req.body || {}, "category");
     const hasQuantity = Object.prototype.hasOwnProperty.call(req.body || {}, "quantity");
     const hasNotes = Object.prototype.hasOwnProperty.call(req.body || {}, "notes");
+    const hasSource = Object.prototype.hasOwnProperty.call(req.body || {}, "source");
 
     const updates = {};
     if (hasName) updates.name = String(req.body.name || "").trim();
     if (hasSku) updates.sku = req.body.sku ? String(req.body.sku).trim() : null;
     if (hasCategory) updates.category = String(req.body.category || "").trim() || null;
     if (hasNotes) updates.notes = String(req.body.notes || "").trim() || null;
+    if (hasSource) updates.source = String(req.body.source || "").trim() || null;
     if (hasQuantity) updates.quantity = Number(req.body.quantity);
 
     if (hasName && !updates.name) {
@@ -134,21 +145,24 @@ router.put("/items/:id", requireApiKey, async (req, res) => {
       return res.status(400).json({ message: "quantity must be a non-negative number" });
     }
 
-    const pool = await getPool();
-    const reqSql = pool.request()
-      .input("id", sql.UniqueIdentifier, req.params.id)
-      .input("name", sql.NVarChar(200), hasName ? updates.name : null)
-      .input("sku", sql.NVarChar(64), hasSku ? updates.sku : null)
-      .input("category", sql.NVarChar(100), hasCategory ? updates.category : null)
-      .input("quantity", sql.Int, hasQuantity ? Math.round(updates.quantity) : null)
-      .input("notes", sql.NVarChar(sql.MAX), hasNotes ? updates.notes : null)
-      .input("hasName", sql.Bit, hasName)
-      .input("hasSku", sql.Bit, hasSku)
-      .input("hasCategory", sql.Bit, hasCategory)
-      .input("hasQuantity", sql.Bit, hasQuantity)
-      .input("hasNotes", sql.Bit, hasNotes);
+    const updated = await withSqlRetry(async (pool) => {
+      const reqSql = pool
+        .request()
+        .input("id", sql.UniqueIdentifier, req.params.id)
+        .input("name", sql.NVarChar(200), hasName ? updates.name : null)
+        .input("sku", sql.NVarChar(64), hasSku ? updates.sku : null)
+        .input("category", sql.NVarChar(100), hasCategory ? updates.category : null)
+        .input("quantity", sql.Int, hasQuantity ? Math.round(updates.quantity) : null)
+        .input("notes", sql.NVarChar(sql.MAX), hasNotes ? updates.notes : null)
+        .input("source", sql.NVarChar(32), hasSource ? updates.source : null)
+        .input("hasName", sql.Bit, hasName)
+        .input("hasSku", sql.Bit, hasSku)
+        .input("hasCategory", sql.Bit, hasCategory)
+        .input("hasQuantity", sql.Bit, hasQuantity)
+        .input("hasNotes", sql.Bit, hasNotes)
+        .input("hasSource", sql.Bit, hasSource);
 
-    await reqSql.query(`
+      await reqSql.query(`
       UPDATE dbo.Items
       SET
         name = CASE WHEN @hasName = 1 THEN @name ELSE name END,
@@ -156,17 +170,20 @@ router.put("/items/:id", requireApiKey, async (req, res) => {
         category = CASE WHEN @hasCategory = 1 THEN @category ELSE category END,
         quantity = CASE WHEN @hasQuantity = 1 THEN @quantity ELSE quantity END,
         notes = CASE WHEN @hasNotes = 1 THEN @notes ELSE notes END,
+        source = CASE WHEN @hasSource = 1 THEN @source ELSE source END,
         updated_at = SYSUTCDATETIME()
       WHERE item_id = @id;
     `);
 
-    const updated = await pool.request()
-      .input("id", sql.UniqueIdentifier, req.params.id)
-      .query(`
-        SELECT item_id, sku, name, category, quantity, notes, image_url, created_at, updated_at
+      return pool
+        .request()
+        .input("id", sql.UniqueIdentifier, req.params.id)
+        .query(`
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @id;
       `);
+    });
 
     if (!updated.recordset.length) {
       return res.status(404).json({ message: "Item not found" });
@@ -184,15 +201,17 @@ router.put("/items/:id", requireApiKey, async (req, res) => {
 
 router.delete("/items/:id", requireApiKey, async (req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request()
-      .input("id", sql.UniqueIdentifier, req.params.id)
-      .query(`
+    const result = await withSqlRetry((pool) =>
+      pool
+        .request()
+        .input("id", sql.UniqueIdentifier, req.params.id)
+        .query(`
         DELETE FROM dbo.Items
         WHERE item_id = @id;
 
         SELECT @@ROWCOUNT AS deletedCount;
-      `);
+      `)
+    );
 
     const deletedCount = result.recordset[0]?.deletedCount || 0;
     if (!deletedCount) {
@@ -213,6 +232,8 @@ router.post("/upload", requireApiKey, upload.single("image"), async (req, res) =
     const notes = String(req.body?.notes || "").trim();
     const skuRaw = req.body?.sku;
     const sku = skuRaw ? String(skuRaw).trim() : null;
+    const sourceRaw = req.body?.source;
+    const source = sourceRaw ? String(sourceRaw).trim() : "manual";
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     if (!name) {
@@ -222,23 +243,26 @@ router.post("/upload", requireApiKey, upload.single("image"), async (req, res) =
       return res.status(400).json({ message: "quantity must be a non-negative number" });
     }
 
-    const pool = await getPool();
-    const result = await pool.request()
-      .input("name", sql.NVarChar(200), name)
-      .input("sku", sql.NVarChar(64), sku)
-      .input("category", sql.NVarChar(100), category || null)
-      .input("quantity", sql.Int, Math.round(quantity))
-      .input("notes", sql.NVarChar(sql.MAX), notes || null)
-      .input("imageUrl", sql.NVarChar(1024), imageUrl)
-      .query(`
+    const result = await withSqlRetry((pool) =>
+      pool
+        .request()
+        .input("name", sql.NVarChar(200), name)
+        .input("sku", sql.NVarChar(64), sku)
+        .input("category", sql.NVarChar(100), category || null)
+        .input("quantity", sql.Int, Math.round(quantity))
+        .input("notes", sql.NVarChar(sql.MAX), notes || null)
+        .input("source", sql.NVarChar(32), source || "manual")
+        .input("imageUrl", sql.NVarChar(1024), imageUrl)
+        .query(`
         DECLARE @newId uniqueidentifier = NEWID();
-        INSERT INTO dbo.Items (item_id, sku, name, category, quantity, notes, image_url, updated_at)
-        VALUES (@newId, @sku, @name, @category, @quantity, @notes, @imageUrl, SYSUTCDATETIME());
+        INSERT INTO dbo.Items (item_id, sku, name, category, quantity, notes, source, image_url, updated_at)
+        VALUES (@newId, @sku, @name, @category, @quantity, @notes, @source, @imageUrl, SYSUTCDATETIME());
 
-        SELECT item_id, sku, name, category, quantity, notes, image_url, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @newId;
-      `);
+      `)
+    );
 
     return res.status(201).json({ item: mapItem(result.recordset[0]) });
   } catch (err) {

@@ -2,8 +2,10 @@ const sql = require("mssql");
 const { DefaultAzureCredential } = require("@azure/identity");
 
 const SQL_SCOPE = "https://database.windows.net/.default";
+/** Refresh AAD token this many ms before it expires (Azure SQL rejects expired tokens). */
 const TOKEN_REFRESH_MS = 5 * 60 * 1000;
-const POOL_MAX_AGE_MS = 50 * 60 * 1000;
+/** Fallback if SDK omits expiry — force new pool + token before this age. */
+const POOL_MAX_AGE_MS = 45 * 60 * 1000;
 
 const authMode = String(process.env.DB_AUTH_MODE || "aad").toLowerCase();
 const credential = new DefaultAzureCredential();
@@ -12,20 +14,38 @@ let tokenCache = null;
 let poolPromise = null;
 let poolCreatedAt = 0;
 
+function normalizeTokenExpiry(tokenResult) {
+  if (!tokenResult) return 0;
+  if (typeof tokenResult.expiresOnTimestamp === "number") {
+    return tokenResult.expiresOnTimestamp;
+  }
+  const d = tokenResult.expiresOn;
+  if (d instanceof Date && !Number.isNaN(d.getTime())) {
+    return d.getTime();
+  }
+  return 0;
+}
+
 async function getAadAccessToken() {
   if (process.env.AZURE_SQL_ACCESS_TOKEN) {
     return process.env.AZURE_SQL_ACCESS_TOKEN;
   }
 
   const now = Date.now();
-  if (tokenCache && tokenCache.expiresOnTimestamp - TOKEN_REFRESH_MS > now) {
+  const exp = tokenCache?.expiresOnTimestamp || 0;
+  if (tokenCache?.token && exp - TOKEN_REFRESH_MS > now) {
     return tokenCache.token;
   }
 
-  tokenCache = await credential.getToken(SQL_SCOPE);
-  if (!tokenCache || !tokenCache.token) {
+  const raw = await credential.getToken(SQL_SCOPE);
+  if (!raw || !raw.token) {
     throw new Error("Failed to acquire Azure SQL access token.");
   }
+  let expiresOnTimestamp = normalizeTokenExpiry(raw);
+  if (!expiresOnTimestamp) {
+    expiresOnTimestamp = now + 50 * 60 * 1000;
+  }
+  tokenCache = { token: raw.token, expiresOnTimestamp };
   return tokenCache.token;
 }
 
@@ -69,18 +89,36 @@ async function connectPool() {
   return sql.connect(config);
 }
 
+async function closePool() {
+  if (!poolPromise) return;
+  try {
+    const existing = await poolPromise;
+    await existing.close();
+  } catch (_e) {
+    // ignore close errors while rotating pool
+  }
+  poolPromise = null;
+}
+
+/**
+ * True when the cached AAD token is missing or past the refresh window — pool must use a new token.
+ */
+function aadTokenNeedsRotation() {
+  if (authMode !== "aad") return false;
+  /** Static token in env — no expiry tracking; keep pool until age limit. */
+  if (process.env.AZURE_SQL_ACCESS_TOKEN) return false;
+  const now = Date.now();
+  const exp = tokenCache?.expiresOnTimestamp || 0;
+  if (!tokenCache?.token || !exp) return true;
+  return exp - TOKEN_REFRESH_MS <= now;
+}
+
 async function getPool() {
   const now = Date.now();
   const poolTooOld = poolPromise && now - poolCreatedAt > POOL_MAX_AGE_MS;
-  if (!poolPromise || poolTooOld) {
-    if (poolTooOld) {
-      try {
-        const existing = await poolPromise;
-        await existing.close();
-      } catch (_e) {
-        // ignore close errors while rotating pool
-      }
-    }
+  const rotateForToken = authMode === "aad" && aadTokenNeedsRotation();
+  if (!poolPromise || poolTooOld || rotateForToken) {
+    await closePool();
     poolPromise = connectPool();
   }
 
@@ -89,6 +127,25 @@ async function getPool() {
   } catch (err) {
     poolPromise = null;
     throw err;
+  }
+}
+
+function isTokenExpiredSqlError(err) {
+  const msg = `${err?.message || ""} ${err?.originalError?.message || ""}`;
+  return /Token is expired/i.test(msg) || /expired.*token/i.test(msg);
+}
+
+/**
+ * Run a DB operation; if Azure SQL rejects an expired AAD token, reset pool + token cache and retry once.
+ */
+async function withSqlRetry(fn) {
+  try {
+    return await fn(await getPool());
+  } catch (err) {
+    if (!isTokenExpiredSqlError(err)) throw err;
+    tokenCache = null;
+    await closePool();
+    return await fn(await getPool());
   }
 }
 
@@ -119,6 +176,10 @@ async function ensureSchema() {
     IF COL_LENGTH('dbo.Items', 'image_url') IS NULL
       ALTER TABLE dbo.Items ADD image_url nvarchar(1024) NULL;
 
+    IF COL_LENGTH('dbo.Items', 'source') IS NULL
+      ALTER TABLE dbo.Items ADD source nvarchar(32) NOT NULL
+        CONSTRAINT DF_Items_source DEFAULT ('manual');
+
     IF COL_LENGTH('dbo.Items', 'created_at') IS NULL
       ALTER TABLE dbo.Items ADD created_at datetime2 NOT NULL
         CONSTRAINT DF_Items_created_at DEFAULT (SYSUTCDATETIME());
@@ -142,5 +203,6 @@ async function ensureSchema() {
 module.exports = {
   sql,
   getPool,
+  withSqlRetry,
   ensureSchema
 };

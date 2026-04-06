@@ -1,12 +1,12 @@
 const express = require("express");
-const { getPool } = require("../db");
+const { withSqlRetry } = require("../db");
 
 const router = express.Router();
 
 router.get("/", async (_req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request().query(`
+    const result = await withSqlRetry((pool) =>
+      pool.request().query(`
       SELECT
         item_id,
         name,
@@ -16,7 +16,8 @@ router.get("/", async (_req, res) => {
       FROM dbo.Items
       WHERE quantity <= 5
       ORDER BY updated_at DESC;
-    `);
+    `)
+    );
 
     const alerts = result.recordset.map((row) => ({
       id: row.item_id,

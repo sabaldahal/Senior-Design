@@ -1,14 +1,13 @@
 const express = require("express");
-const { getPool } = require("../db");
+const { withSqlRetry } = require("../db");
 
 const router = express.Router();
 
 router.get("/summary", async (_req, res) => {
   try {
-    const pool = await getPool();
-
-    const [totals, weekly] = await Promise.all([
-      pool.request().query(`
+    const { totals, weekly } = await withSqlRetry(async (pool) => {
+      const [totalsResult, weeklyResult] = await Promise.all([
+        pool.request().query(`
         SELECT
           COUNT(*) AS totalItems,
           SUM(CASE WHEN quantity <= 5 THEN 1 ELSE 0 END) AS lowStockCount,
@@ -16,7 +15,7 @@ router.get("/summary", async (_req, res) => {
           COUNT(DISTINCT NULLIF(category, '')) AS categories
         FROM dbo.Items;
       `),
-      pool.request().query(`
+        pool.request().query(`
         ;WITH last7 AS (
           SELECT CAST(DATEADD(day, -v.n, CAST(SYSUTCDATETIME() AS date)) AS date) AS d
           FROM (VALUES (0),(1),(2),(3),(4),(5),(6)) v(n)
@@ -31,7 +30,9 @@ router.get("/summary", async (_req, res) => {
         FROM last7
         ORDER BY d;
       `)
-    ]);
+      ]);
+      return { totals: totalsResult, weekly: weeklyResult };
+    });
 
     const summary = totals.recordset[0] || {
       totalItems: 0,

@@ -52,16 +52,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
+        <div className="bg-white rounded-xl shadow-card p-8 border border-neutral-200">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white">AI Inventory</h1>
-            <p className="text-slate-300 mt-2">Sign in to your account</p>
+            <h1 className="text-3xl font-bold text-neutral-900">Warehouse Inventory</h1>
+            <p className="text-neutral-600 mt-2">Sign in to your account</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-slate-300 mb-2">
+              <label htmlFor="username" className="block text-sm font-medium text-neutral-700 mb-2">
                 Username or Email
               </label>
               <input
@@ -70,13 +70,13 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg bg-white border border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 autoComplete="username"
                 disabled={loading}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
                 Password
               </label>
               <input
@@ -85,18 +85,18 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg bg-white border border-neutral-300 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 autoComplete="current-password"
                 disabled={loading}
               />
             </div>
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/20 text-red-200 text-sm">
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm">
                 {error}
               </div>
             )}
             {notice && (
-              <div className="p-3 rounded-lg bg-emerald-500/20 text-emerald-100 text-sm">
+              <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
                 {notice}
               </div>
             )}
@@ -108,7 +108,7 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
-          <p className="mt-6 text-center text-slate-400 text-sm">Use your backend credentials.</p>
+          <p className="mt-6 text-center text-neutral-500 text-sm">Use your backend credentials.</p>
         </div>
       </div>
     </div>
