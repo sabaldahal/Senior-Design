@@ -12,8 +12,19 @@ Express API for the inventory dashboard frontend.
 - `PUT /api/inventory/items/:id`
 - `DELETE /api/inventory/items/:id`
 - `POST /api/inventory/upload` (multipart form-data; stores local image path)
+- `POST /api/inventory/inference` (JSON — create or update a row from ML inference output; see below)
 - `GET /api/dashboard/summary`
 - `GET /api/alerts`
+- `POST /api/alerts/send-low-stock-email` — run low-stock digest email (same logic as optional cron)
+
+## Low-stock email alerts
+
+1. Set **`ALERT_EMAIL_TO`** to one or more comma-separated addresses.
+2. Configure **SMTP** (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, optional `SMTP_PORT`, `SMTP_FROM`, `SMTP_SECURE=true` for 465).
+3. Optional: **`INVENTORY_LOW_THRESHOLD`** (default `5`), **`ALERT_EMAIL_COOLDOWN_HOURS`** (default `24`) so the same item is not emailed again until cooldown passes or it restocks above the threshold (log row is cleared on restock).
+4. Optional cron: **`ENABLE_LOW_STOCK_EMAIL_CRON=true`** and **`LOW_STOCK_CRON`** (default `0 */6 * * *` — every 6 hours).
+
+The job uses table **`dbo.AlertItemEmailLog`** to track last send time per item. Enable **Email/Password** or your SMTP provider’s requirements (e.g. Gmail [app passwords](https://support.google.com/accounts/answer/185833)).
 
 ## 1) Setup
 
@@ -37,7 +48,22 @@ CORS_ORIGIN=http://localhost:5173
 API_KEY=
 ```
 
-`API_KEY` is optional. If set, write endpoints require `x-api-key`.
+`API_KEY` is optional (legacy; inventory writes are not gated by it when using Firebase below).
+
+### Firebase Authentication (ID token verification)
+
+When **`FIREBASE_SERVICE_ACCOUNT_PATH`** (or **`FIREBASE_SERVICE_ACCOUNT_JSON`**) is set, the backend initializes **Firebase Admin** and requires a valid **Firebase ID token** on:
+
+- `/api/inventory/*`
+- `/api/dashboard/*`
+- `/api/alerts/*`
+
+The SPA should send `Authorization: Bearer <Firebase ID token>` (the frontend does this after Email/Password sign-in).
+
+1. Firebase Console → **Project settings** → **Service accounts** → **Generate new private key** → save JSON (do not commit).
+2. In `backend/.env`: `FIREBASE_SERVICE_ACCOUNT_PATH=./your-key.json` (path relative to the backend folder, or use an absolute path).
+
+If Admin is **not** configured, those routes stay **open** (useful for local experiments only).
 
 ### Entra-only Azure SQL (recommended)
 
@@ -96,5 +122,39 @@ On startup, backend ensures `dbo.Items` exists and adds missing columns:
 - `image_url`
 - `created_at`
 - `updated_at`
+- `ml_confidence` (real, nullable — model confidence score)
+- `ml_metadata` (nvarchar(max), nullable — JSON string for any extra inference fields)
 
 This allows you to start with a single-table scope and evolve later.
+
+### Inference → inventory (`POST /api/inventory/inference`)
+
+Same auth as other writes: if `API_KEY` is set, send header `x-api-key`.
+
+**Create** (no `itemId`): body must include **`name`** or **`label`** (inferred product name). Optional: `category`, `quantity` (default `1`), `sku`, `notes`, `imageUrl` / `image_url`, `confidence` → stored in `ml_confidence`, `metadata` (object or JSON string) → `ml_metadata`, `source` (default `inference`).
+
+**Update** (include **`itemId`** or **`item_id`**): send any subset of fields to patch; at least one field must be present.
+
+Example (create after your model runs):
+
+```json
+POST /api/inventory/inference
+{
+  "label": "Widget A",
+  "category": "Hardware",
+  "confidence": 0.94,
+  "quantity": 5,
+  "metadata": { "model": "v2", "topK": ["Widget A", "Widget B"] }
+}
+```
+
+Example (refresh inference fields on an existing row):
+
+```json
+POST /api/inventory/inference
+{
+  "itemId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "confidence": 0.88,
+  "metadata": { "reclassifiedAt": "2026-04-06T12:00:00Z" }
+}
+```

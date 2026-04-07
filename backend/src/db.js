@@ -188,6 +188,40 @@ async function ensureSchema() {
       ALTER TABLE dbo.Items ADD updated_at datetime2 NOT NULL
         CONSTRAINT DF_Items_updated_at DEFAULT (SYSUTCDATETIME());
 
+    IF COL_LENGTH('dbo.Items', 'ml_confidence') IS NULL
+      ALTER TABLE dbo.Items ADD ml_confidence real NULL;
+
+    IF COL_LENGTH('dbo.Items', 'ml_metadata') IS NULL
+      ALTER TABLE dbo.Items ADD ml_metadata nvarchar(max) NULL;
+
+    IF OBJECT_ID('dbo.AlertItemEmailLog', 'U') IS NULL
+    BEGIN
+      CREATE TABLE dbo.AlertItemEmailLog (
+        item_id uniqueidentifier NOT NULL
+          CONSTRAINT PK_AlertItemEmailLog PRIMARY KEY,
+        last_sent_at datetime2 NOT NULL
+          CONSTRAINT DF_AlertItemEmailLog_last_sent DEFAULT (SYSUTCDATETIME())
+      );
+    END;
+
+    IF OBJECT_ID('dbo.CapturedImages', 'U') IS NULL
+    BEGIN
+      CREATE TABLE dbo.CapturedImages (
+        image_id uniqueidentifier NOT NULL
+          CONSTRAINT PK_CapturedImages PRIMARY KEY
+          DEFAULT NEWID(),
+        image_url nvarchar(1024) NOT NULL,
+        object_id nvarchar(128) NULL,
+        object_name nvarchar(200) NULL,
+        bbox nvarchar(max) NULL,
+        metadata nvarchar(max) NULL,
+        source nvarchar(32) NOT NULL
+          CONSTRAINT DF_CapturedImages_source DEFAULT ('camera_capture'),
+        created_at datetime2 NOT NULL
+          CONSTRAINT DF_CapturedImages_created_at DEFAULT (SYSUTCDATETIME())
+      );
+    END;
+
     IF NOT EXISTS (
       SELECT 1
       FROM sys.indexes
