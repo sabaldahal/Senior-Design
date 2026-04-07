@@ -28,7 +28,7 @@ npm run build
 
 ## Pages
 
-1. **Login** - Username/password (demo: any credentials work)
+1. **Login** - Firebase **Email/Password** when `VITE_FIREBASE_*` is set in `.env.local`; otherwise legacy backend/demo login
 2. **Dashboard** - Summary cards, weekly activity chart
 3. **Inventory** - Table of items with search
 4. **Item Detail** - Single item view
@@ -39,8 +39,10 @@ npm run build
 
 The app uses mock data by default. To connect to a real backend:
 
-1. Create `.env` with `VITE_API_URL=http://localhost:3000/api` (or your API base URL)
-2. Ensure the backend exposes:
+1. Copy `.env.example` to `.env.local` and set `VITE_FIREBASE_*` from Firebase Console (Web app). Set `VITE_API_URL=http://localhost:3000/api` if needed.
+2. Backend must verify tokens: set `FIREBASE_SERVICE_ACCOUNT_PATH` in the API `.env` to your downloaded service account JSON.
+3. In Firebase Console → **Authentication** → **Sign-in method**, enable **Email/Password** (and add users or use **Register** on the login page).
+4. Ensure the backend exposes:
    - `POST /api/auth/login`
    - `GET /api/inventory/items`
    - `GET /api/inventory/items/:id`

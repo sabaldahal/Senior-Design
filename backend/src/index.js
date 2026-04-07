@@ -11,6 +11,9 @@ const authRoutes = require("./routes/auth");
 const inventoryRoutes = require("./routes/inventory");
 const dashboardRoutes = require("./routes/dashboard");
 const alertsRoutes = require("./routes/alerts");
+const { initFirebaseAdmin, requireFirebaseAuth } = require("./middleware/firebaseAuth");
+
+const firebaseAuthEnabled = initFirebaseAdmin();
 
 const app = express();
 
@@ -40,6 +43,13 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+
+if (firebaseAuthEnabled) {
+  app.use("/api/inventory", requireFirebaseAuth);
+  app.use("/api/dashboard", requireFirebaseAuth);
+  app.use("/api/alerts", requireFirebaseAuth);
+}
+
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/alerts", alertsRoutes);
