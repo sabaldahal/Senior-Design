@@ -22,7 +22,7 @@ export const inventoryApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
   getCaptures: () => apiClient.get('/inventory/captures'),
-  /** Apply ML inference output: create row or patch existing (itemId). See backend POST /api/inventory/inference */
+  /** Apply ML inference output (supports object_name/object_id/aisle_id) and create or patch an item. */
   applyInference: (payload) => apiClient.post('/inventory/inference', payload),
 };
 

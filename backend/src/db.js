@@ -194,6 +194,9 @@ async function ensureSchema() {
     IF COL_LENGTH('dbo.Items', 'ml_metadata') IS NULL
       ALTER TABLE dbo.Items ADD ml_metadata nvarchar(max) NULL;
 
+    IF COL_LENGTH('dbo.Items', 'aisle_id') IS NULL
+      ALTER TABLE dbo.Items ADD aisle_id nvarchar(64) NULL;
+
     IF OBJECT_ID('dbo.AlertItemEmailLog', 'U') IS NULL
     BEGIN
       CREATE TABLE dbo.AlertItemEmailLog (
@@ -213,6 +216,7 @@ async function ensureSchema() {
         image_url nvarchar(1024) NOT NULL,
         object_id nvarchar(128) NULL,
         object_name nvarchar(200) NULL,
+        aisle_id nvarchar(64) NULL,
         bbox nvarchar(max) NULL,
         metadata nvarchar(max) NULL,
         source nvarchar(32) NOT NULL

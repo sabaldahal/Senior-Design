@@ -33,6 +33,7 @@ function mapItem(row) {
     notes: row.notes || "",
     imageUrl: row.image_url || null,
     source: row.source || "manual",
+    aisle_id: row.aisle_id || null,
     ml_confidence:
       row.ml_confidence != null && row.ml_confidence !== undefined ? Number(row.ml_confidence) : null,
     ml_metadata: row.ml_metadata || null,
@@ -61,6 +62,7 @@ function mapCapture(row) {
     imageUrl: row.image_url,
     object_id: row.object_id || null,
     object_name: row.object_name || null,
+    aisle_id: row.aisle_id || null,
     bbox: row.bbox || null,
     metadata: row.metadata || null,
     source: row.source || "camera_capture",
@@ -72,7 +74,7 @@ router.get("/items", async (_req, res) => {
   try {
     const result = await withSqlRetry((pool) =>
       pool.request().query(`
-      SELECT item_id, sku, name, category, quantity, notes, image_url, source, ml_confidence, ml_metadata, created_at, updated_at
+      SELECT item_id, sku, name, category, quantity, notes, image_url, source, aisle_id, ml_confidence, ml_metadata, created_at, updated_at
       FROM dbo.Items
       ORDER BY name ASC;
     `)
@@ -90,7 +92,7 @@ router.get("/items/:id", async (req, res) => {
         .request()
         .input("id", sql.UniqueIdentifier, req.params.id)
         .query(`
-        SELECT item_id, sku, name, category, quantity, notes, image_url, source, ml_confidence, ml_metadata, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, aisle_id, ml_confidence, ml_metadata, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @id;
       `)
@@ -138,7 +140,7 @@ router.post("/items", async (req, res) => {
         INSERT INTO dbo.Items (item_id, sku, name, category, quantity, notes, source, updated_at)
         VALUES (@newId, @sku, @name, @category, @quantity, @notes, @source, SYSUTCDATETIME());
 
-        SELECT item_id, sku, name, category, quantity, notes, image_url, source, ml_confidence, ml_metadata, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, aisle_id, ml_confidence, ml_metadata, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @newId;
       `)
@@ -209,7 +211,7 @@ router.put("/items/:id", async (req, res) => {
         .request()
         .input("id", sql.UniqueIdentifier, req.params.id)
         .query(`
-        SELECT item_id, sku, name, category, quantity, notes, image_url, source, ml_confidence, ml_metadata, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, aisle_id, ml_confidence, ml_metadata, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @id;
       `);
@@ -260,6 +262,7 @@ router.delete("/items/:id", async (req, res) => {
  * - image (required file)
  * - object_id / objectId (optional)
  * - object_name / objectName (optional)
+ * - aisle_id / aisleId (optional)
  * - bbox / bounding_box / boundingBox (optional, object/array/string)
  * - metadata (optional, object/string)
  */
@@ -271,8 +274,10 @@ router.post("/captures", upload.single("image"), async (req, res) => {
 
     const objectIdRaw = req.body?.object_id ?? req.body?.objectId ?? null;
     const objectNameRaw = req.body?.object_name ?? req.body?.objectName ?? null;
+    const aisleIdRaw = req.body?.aisle_id ?? req.body?.aisleId ?? null;
     const objectId = objectIdRaw ? String(objectIdRaw).trim() : null;
     const objectName = objectNameRaw ? String(objectNameRaw).trim() : null;
+    const aisleId = aisleIdRaw ? String(aisleIdRaw).trim() : null;
     const bboxRaw = req.body?.bbox ?? req.body?.bounding_box ?? req.body?.boundingBox ?? null;
     const bboxStr = serializeMlMetadata(bboxRaw);
     const metadataStr = serializeMlMetadata(req.body?.metadata ?? null);
@@ -284,19 +289,20 @@ router.post("/captures", upload.single("image"), async (req, res) => {
         .input("imageUrl", sql.NVarChar(1024), imageUrl)
         .input("objectId", sql.NVarChar(128), objectId)
         .input("objectName", sql.NVarChar(200), objectName)
+        .input("aisleId", sql.NVarChar(64), aisleId)
         .input("bbox", sql.NVarChar(sql.MAX), bboxStr)
         .input("metadata", sql.NVarChar(sql.MAX), metadataStr)
         .input("source", sql.NVarChar(32), "camera_capture")
         .query(`
         DECLARE @newId uniqueidentifier = NEWID();
         INSERT INTO dbo.CapturedImages (
-          image_id, image_url, object_id, object_name, bbox, metadata, source
+          image_id, image_url, object_id, object_name, aisle_id, bbox, metadata, source
         )
         VALUES (
-          @newId, @imageUrl, @objectId, @objectName, @bbox, @metadata, @source
+          @newId, @imageUrl, @objectId, @objectName, @aisleId, @bbox, @metadata, @source
         );
 
-        SELECT image_id, image_url, object_id, object_name, bbox, metadata, source, created_at
+        SELECT image_id, image_url, object_id, object_name, aisle_id, bbox, metadata, source, created_at
         FROM dbo.CapturedImages
         WHERE image_id = @newId;
       `)
@@ -312,7 +318,7 @@ router.get("/captures", async (_req, res) => {
   try {
     const result = await withSqlRetry((pool) =>
       pool.request().query(`
-      SELECT image_id, image_url, object_id, object_name, bbox, metadata, source, created_at
+      SELECT image_id, image_url, object_id, object_name, aisle_id, bbox, metadata, source, created_at
       FROM dbo.CapturedImages
       ORDER BY created_at DESC;
     `)
@@ -354,6 +360,10 @@ router.post("/inference", async (req, res) => {
 
     const hasCategory = Object.prototype.hasOwnProperty.call(body, "category");
     const categoryVal = hasCategory ? String(body.category || "").trim() || null : null;
+    const hasAisleId =
+      Object.prototype.hasOwnProperty.call(body, "aisle_id") ||
+      Object.prototype.hasOwnProperty.call(body, "aisleId");
+    const aisleIdVal = hasAisleId ? String(body.aisle_id ?? body.aisleId ?? "").trim() || null : null;
 
     const hasConfidence = Object.prototype.hasOwnProperty.call(body, "confidence");
     const confidenceVal = hasConfidence ? Number(body.confidence) : null;
@@ -409,6 +419,7 @@ router.post("/inference", async (req, res) => {
         hasCategory ||
         hasConfidence ||
         hasQuantity ||
+        hasAisleId ||
         hasSku ||
         hasObjectId ||
         hasNotes ||
@@ -437,6 +448,7 @@ router.post("/inference", async (req, res) => {
           .input("name", sql.NVarChar(200), hasName || hasLabel || hasObjectName ? nameCandidate : null)
           .input("category", sql.NVarChar(100), hasCategory ? categoryVal : null)
           .input("quantity", sql.Int, hasQuantity ? Math.round(quantityVal) : null)
+          .input("aisleId", sql.NVarChar(64), hasAisleId ? aisleIdVal : null)
           .input("sku", sql.NVarChar(64), hasSku || hasObjectId ? skuVal : null)
           .input("notes", sql.NVarChar(sql.MAX), hasNotes ? notesVal : null)
           .input("imageUrl", sql.NVarChar(1024), hasImageUrl ? imageUrlVal : null)
@@ -446,6 +458,7 @@ router.post("/inference", async (req, res) => {
           .input("hName", sql.Bit, !!(hasName || hasLabel || hasObjectName))
           .input("hCategory", sql.Bit, hasCategory)
           .input("hQuantity", sql.Bit, hasQuantity)
+          .input("hAisleId", sql.Bit, hasAisleId)
           .input("hSku", sql.Bit, hasSku || hasObjectId)
           .input("hNotes", sql.Bit, hasNotes)
           .input("hImageUrl", sql.Bit, hasImageUrl)
@@ -458,6 +471,7 @@ router.post("/inference", async (req, res) => {
           name = CASE WHEN @hName = 1 THEN @name ELSE name END,
           category = CASE WHEN @hCategory = 1 THEN @category ELSE category END,
           quantity = CASE WHEN @hQuantity = 1 THEN @quantity ELSE quantity END,
+          aisle_id = CASE WHEN @hAisleId = 1 THEN @aisleId ELSE aisle_id END,
           sku = CASE WHEN @hSku = 1 THEN @sku ELSE sku END,
           notes = CASE WHEN @hNotes = 1 THEN @notes ELSE notes END,
           image_url = CASE WHEN @hImageUrl = 1 THEN @imageUrl ELSE image_url END,
@@ -472,7 +486,7 @@ router.post("/inference", async (req, res) => {
           .request()
           .input("id", sql.UniqueIdentifier, itemId)
           .query(`
-        SELECT item_id, sku, name, category, quantity, notes, image_url, source, ml_confidence, ml_metadata, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, aisle_id, ml_confidence, ml_metadata, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @id;
       `);
@@ -495,6 +509,10 @@ router.post("/inference", async (req, res) => {
     }
 
     const category = String(body.category || "Uncategorized").trim();
+    const aisleId =
+      body.aisle_id != null || body.aisleId != null
+        ? String(body.aisle_id ?? body.aisleId ?? "").trim() || null
+        : null;
     const sku = body.sku
       ? String(body.sku).trim()
       : body.object_id || body.objectId
@@ -532,6 +550,7 @@ router.post("/inference", async (req, res) => {
         .input("sku", sql.NVarChar(64), sku)
         .input("category", sql.NVarChar(100), category || null)
         .input("quantity", sql.Int, Math.round(quantity))
+        .input("aisleId", sql.NVarChar(64), aisleId)
         .input("notes", sql.NVarChar(sql.MAX), notes)
         .input("source", sql.NVarChar(32), source || "inference")
         .input("imageUrl", sql.NVarChar(1024), imageUrl)
@@ -541,14 +560,14 @@ router.post("/inference", async (req, res) => {
         DECLARE @newId uniqueidentifier = NEWID();
         INSERT INTO dbo.Items (
           item_id, sku, name, category, quantity, notes, source, image_url,
-          ml_confidence, ml_metadata, updated_at
+          aisle_id, ml_confidence, ml_metadata, updated_at
         )
         VALUES (
           @newId, @sku, @name, @category, @quantity, @notes, @source, @imageUrl,
-          @mlConfidence, @mlMetadata, SYSUTCDATETIME()
+          @aisleId, @mlConfidence, @mlMetadata, SYSUTCDATETIME()
         );
 
-        SELECT item_id, sku, name, category, quantity, notes, image_url, source, ml_confidence, ml_metadata, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, aisle_id, ml_confidence, ml_metadata, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @newId;
       `)
@@ -599,7 +618,7 @@ router.post("/upload", upload.single("image"), async (req, res) => {
         INSERT INTO dbo.Items (item_id, sku, name, category, quantity, notes, source, image_url, updated_at)
         VALUES (@newId, @sku, @name, @category, @quantity, @notes, @source, @imageUrl, SYSUTCDATETIME());
 
-        SELECT item_id, sku, name, category, quantity, notes, image_url, source, ml_confidence, ml_metadata, created_at, updated_at
+        SELECT item_id, sku, name, category, quantity, notes, image_url, source, aisle_id, ml_confidence, ml_metadata, created_at, updated_at
         FROM dbo.Items
         WHERE item_id = @newId;
       `)
