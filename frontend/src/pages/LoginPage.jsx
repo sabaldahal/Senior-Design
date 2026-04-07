@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Warehouse } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/inventory';
 
@@ -56,6 +57,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-xl shadow-card p-8 border border-neutral-200">
           <div className="text-center mb-8">
+            <div
+              className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-600/10 text-primary-600"
+              aria-hidden
+            >
+              <Warehouse size={32} strokeWidth={2} />
+            </div>
             <h1 className="text-3xl font-bold text-neutral-900">Warehouse Inventory</h1>
             <p className="text-neutral-600 mt-2">Sign in to your account</p>
           </div>
