@@ -12,6 +12,8 @@ const inventoryRoutes = require("./routes/inventory");
 const dashboardRoutes = require("./routes/dashboard");
 const alertsRoutes = require("./routes/alerts");
 const { initFirebaseAdmin, requireFirebaseAuth } = require("./middleware/firebaseAuth");
+const cron = require("node-cron");
+const { runLowStockEmailJob } = require("./services/lowStockAlerts");
 
 const firebaseAuthEnabled = initFirebaseAdmin();
 
@@ -25,7 +27,11 @@ if (process.platform === "win32") {
   }
 }
 
-const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+// Default allows common Vite dev ports (5173/5174) and loopback — set CORS_ORIGIN in .env to override.
+const allowedOrigins = (
+  process.env.CORS_ORIGIN ||
+  "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174"
+)
   .split(",")
   .map((x) => x.trim())
   .filter(Boolean);
@@ -65,6 +71,15 @@ async function start() {
     await ensureSchema();
     app.listen(port, () => {
       console.log(`Backend listening on http://localhost:${port}`);
+      if (process.env.ENABLE_LOW_STOCK_EMAIL_CRON === "true") {
+        const schedule = process.env.LOW_STOCK_CRON || "0 */6 * * *";
+        cron.schedule(schedule, () => {
+          runLowStockEmailJob()
+            .then((r) => console.log("[low-stock-email]", JSON.stringify(r)))
+            .catch((e) => console.error("[low-stock-email]", e.message));
+        });
+        console.log(`Low-stock email cron enabled: ${schedule}`);
+      }
     });
   } catch (err) {
     console.error("Failed to start backend:", err.message);

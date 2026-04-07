@@ -5,6 +5,7 @@ import {
   PlusCircle,
   Camera,
   Bell,
+  Images,
   LogOut,
   Warehouse,
 } from 'lucide-react';
@@ -15,6 +16,7 @@ const navItems = [
   { to: '/inventory', label: 'Inventory', icon: Boxes },
   { to: '/add-item', label: 'Add Item', icon: PlusCircle },
   { to: '/camera', label: 'Camera', icon: Camera },
+  { to: '/captures', label: 'Captures', icon: Images },
   { to: '/alerts', label: 'Alerts', icon: Bell },
 ];
 

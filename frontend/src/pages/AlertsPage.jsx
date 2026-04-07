@@ -17,6 +17,8 @@ export default function AlertsPage() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [emailJobLoading, setEmailJobLoading] = useState(false);
+  const [emailJobMessage, setEmailJobMessage] = useState(null);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -39,12 +41,49 @@ export default function AlertsPage() {
     fetchAlerts();
   }, []);
 
+  const handleSendEmails = async () => {
+    setEmailJobLoading(true);
+    setEmailJobMessage(null);
+    try {
+      const { data } = await dashboardApi.sendLowStockEmail();
+      if (data.ok && data.itemsNotified > 0) {
+        setEmailJobMessage(`Email sent for ${data.itemsNotified} item(s).`);
+      } else if (data.ok && data.itemsNotified === 0) {
+        setEmailJobMessage(data.message || 'No email sent (nothing to notify or cooldown).');
+      } else {
+        setEmailJobMessage(data.reason || data.message || 'Could not send email. Check server SMTP settings.');
+      }
+    } catch (err) {
+      setEmailJobMessage(
+        err.response?.data?.message || err.response?.data?.reason || err.message || 'Request failed',
+      );
+    } finally {
+      setEmailJobLoading(false);
+    }
+  };
+
   return (
     <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Alerts</h1>
-        <p className="text-slate-600 mt-1">Low-stock and system notifications</p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Alerts</h1>
+          <p className="text-slate-600 mt-1">Low-stock and system notifications</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleSendEmails}
+          disabled={emailJobLoading}
+          className="shrink-0 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+        >
+          {emailJobLoading ? 'Sending…' : 'Send low-stock emails now'}
+        </button>
       </div>
+
+      {emailJobMessage && (
+        <div className="mb-4 p-3 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 text-sm">
+          {emailJobMessage}
+        </div>
+      )}
 
       {error && (
         <div className="mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">

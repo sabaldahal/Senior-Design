@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { classifyApi } from '../api/classify';
+import { inventoryApi } from '../api/inventory';
 
 const CAPTURE_WIDTH = 640;
 const CAPTURE_HEIGHT = 480;
@@ -19,6 +20,9 @@ export default function CameraCapturePage() {
   const [classifying, setClassifying] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [savingCapture, setSavingCapture] = useState(false);
+  const [captureStatus, setCaptureStatus] = useState('');
+  const [captureId, setCaptureId] = useState(null);
 
   // ---------------------------------------------------------------------------
   // Enumerate video input devices on mount
@@ -119,11 +123,50 @@ export default function CameraCapturePage() {
           setCapturedBlob(blob);
           setCapturedUrl(URL.createObjectURL(blob));
           setResult(null);
+          setCaptureStatus('');
+          setCaptureId(null);
         }
       },
       'image/png',
     );
   }, []);
+
+  // ---------------------------------------------------------------------------
+  // Persist captured frame to backend for later/offline inference pipelines
+  // ---------------------------------------------------------------------------
+  const saveCaptureToBackend = useCallback(
+    async (classification = null) => {
+      if (!capturedBlob) return null;
+      setSavingCapture(true);
+      setCaptureStatus('');
+      try {
+        const formData = new FormData();
+        formData.append('image', capturedBlob, `capture_${Date.now()}.png`);
+        if (classification?.object_id) formData.append('object_id', String(classification.object_id));
+        if (classification?.objectId) formData.append('object_id', String(classification.objectId));
+        if (classification?.label) formData.append('object_name', String(classification.label));
+        if (classification?.object_name) formData.append('object_name', String(classification.object_name));
+        if (classification?.objectName) formData.append('object_name', String(classification.objectName));
+        if (classification?.bbox != null) formData.append('bbox', JSON.stringify(classification.bbox));
+        if (classification?.bounding_box != null) {
+          formData.append('bbox', JSON.stringify(classification.bounding_box));
+        }
+        formData.append('metadata', JSON.stringify({ classification }));
+
+        const { data } = await inventoryApi.uploadCapture(formData);
+        const id = data?.capture?.id || data?.capture?.image_id || null;
+        setCaptureId(id);
+        setCaptureStatus('Capture saved to backend.');
+        return data?.capture || null;
+      } catch (err) {
+        setCaptureStatus(err.response?.data?.message || err.message || 'Failed to save capture.');
+        return null;
+      } finally {
+        setSavingCapture(false);
+      }
+    },
+    [capturedBlob],
+  );
 
   // ---------------------------------------------------------------------------
   // Send captured image to ML classify Lambda
@@ -137,6 +180,7 @@ export default function CameraCapturePage() {
     try {
       const { data } = await classifyApi.classifyImage(capturedBlob);
       setResult(data);
+      await saveCaptureToBackend(data);
     } catch (err) {
       const isNetworkFailure = !err.response;
       if (isNetworkFailure) {
@@ -154,7 +198,7 @@ export default function CameraCapturePage() {
     } finally {
       setClassifying(false);
     }
-  }, [capturedBlob]);
+  }, [capturedBlob, saveCaptureToBackend]);
 
   // ---------------------------------------------------------------------------
   // Navigate to Add Item with pre-filled data from classification
@@ -269,13 +313,22 @@ export default function CameraCapturePage() {
             />
 
             {!result && (
-              <button
-                onClick={classifyCapture}
-                disabled={classifying}
-                className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
-              >
-                {classifying ? 'Classifying...' : 'Classify Item'}
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={classifyCapture}
+                  disabled={classifying}
+                  className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {classifying ? 'Classifying...' : 'Classify Item'}
+                </button>
+                <button
+                  onClick={() => saveCaptureToBackend(null)}
+                  disabled={savingCapture}
+                  className="w-full py-3 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {savingCapture ? 'Saving…' : 'Save Capture Anyway'}
+                </button>
+              </div>
             )}
 
             {result && (
@@ -304,6 +357,13 @@ export default function CameraCapturePage() {
                     </p>
                   )}
                 </div>
+
+                {captureStatus && (
+                  <div className="p-3 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-sm">
+                    {captureStatus}
+                    {captureId ? ` (ID: ${captureId})` : ''}
+                  </div>
+                )}
 
                 <div className="flex gap-3">
                   <button

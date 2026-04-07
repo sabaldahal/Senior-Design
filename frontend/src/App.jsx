@@ -8,6 +8,7 @@ import ItemDetailPage from './pages/ItemDetailPage';
 import AddItemPage from './pages/AddItemPage';
 import AlertsPage from './pages/AlertsPage';
 import CameraCapturePage from './pages/CameraCapturePage';
+import CapturedImagesPage from './pages/CapturedImagesPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="inventory/:id" element={<ItemDetailPage />} />
           <Route path="add-item" element={<AddItemPage />} />
           <Route path="camera" element={<CameraCapturePage />} />
+          <Route path="captures" element={<CapturedImagesPage />} />
           <Route path="alerts" element={<AlertsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
