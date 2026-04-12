@@ -16,9 +16,19 @@ export const inventoryApi = {
     apiClient.post('/inventory/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  /** Store a raw camera capture for later model processing */
+  uploadCapture: (formData) =>
+    apiClient.post('/inventory/captures', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  getCaptures: () => apiClient.get('/inventory/captures'),
+  /** Apply ML inference output: create row or patch existing (itemId). See backend POST /api/inventory/inference */
+  applyInference: (payload) => apiClient.post('/inventory/inference', payload),
 };
 
 export const dashboardApi = {
   getSummary: () => apiClient.get('/dashboard/summary'),
   getAlerts: () => apiClient.get('/alerts'),
+  /** Runs low-stock email job (same as cron). Requires SMTP + ALERT_EMAIL_TO on server. */
+  sendLowStockEmail: () => apiClient.post('/alerts/send-low-stock-email'),
 };
