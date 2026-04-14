@@ -25,21 +25,27 @@ Once the robot has collected data from its sensors, it can transmit this data to
 
 ## Frontend
 
+The frontend is built with React (Vite) and serves as the main operator dashboard for monitoring and managing warehouse inventory data coming from manual updates and robot-assisted inference.
 
 ### Inventory Dashboard
 
+The inventory dashboard provides a centralized view of all tracked items, including product details, quantity, source, and image references. Users can add, edit, delete, and upload inventory items through the UI, and they can review newly detected items pushed through the inference pipeline.
 
 ### Real-time Data Visualization
 
+The dashboard surfaces live inventory state and low-stock alerts based on backend API responses. During demo runs, updates from camera/inference submissions are reflected quickly in the interface, allowing users to verify detections and stock changes without needing direct database access.
 
 ## Backend
 
 ### Data Processing and Storage
 
+The backend is implemented in Node.js/Express and persists data in Azure SQL. It stores core inventory records, captured image metadata, inference-related fields (such as confidence and metadata), and alert logging information used for low-stock email cooldown tracking.
 ### API Development
 
+REST APIs were developed for inventory CRUD operations, image uploads, camera capture ingestion, inference submission, dashboard summary retrieval, and alerts. The inference endpoint supports flexible payloads (for example object name aliases, quantity, aisle context, and metadata) so robotics and ML components can integrate without strict coupling.
 ### Integration with Robot and Frontend
 
+The backend acts as the integration layer between the robot pipeline and the web application. Robot-side detection outputs are transformed into API requests (object class counts and aisle information) and sent to the inference endpoint; the frontend then consumes the updated inventory and alert APIs to present the latest operational state to users.
 
 ## Synthetic Dataset Generation
 We created a synthetic dataset to train our object detection model. The dataset consists of images captured from RGB camera. We used Blender to generate these images, which include various objects commonly found in a warehouse setting, such as boxes, pallets, and shelves. The dataset is annotated with bounding boxes and class labels for each object, which allows us to train our YOLO model effectively. The synthetic dataset helps us to overcome the challenges of collecting and annotating real-world data, and it provides a diverse set of training examples that improve the robustness of our object detection model.
